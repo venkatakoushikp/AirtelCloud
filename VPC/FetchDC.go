@@ -1,6 +1,7 @@
 package VPC
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,42 +11,16 @@ const (
 	baseURL = "https://www.cv-prod-india-1.arista.io/api/resources/studio/v1/Inputs"
 	studioID = "studio-evpn-services"
 	TenantCount = 4 // Currently they are 4 Tenants Chennai-AZ1 Chennai-AZ2 Manesar-AZ1 Manesar-AZ2
-	
 )
 
-/*
-
-{
-  "value": {
-    "key": {
-      "studioId": "studio-evpn-services",
-      "workspaceId": "",
-      "path": {
-        "values": [
-          "tenants",
-          "0",
-          "name"
-        ]
-      }
-    },
-    "createdAt": "2025-04-01T05:13:37.233414941Z",
-    "createdBy": "Siddharth-Arista",
-    "lastModifiedAt": "2025-09-29T10:37:25.988347618Z",
-    "lastModifiedBy": "Coredge",
-    "inputs": "\"Chennai-AZ1\""
-  },
-  "time": "2025-09-30T04:50:40.465841712Z"
+var DCMAP = make(map[string]string)
+var VRFs = make(map[int]map[int]string)
+func SetHeaders(req *http.Request, token string){
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	temp:= fmt.Sprintf("Bearer %s", token)
+	req.Header.Set("Authorization", temp)
 }
-
-
-*/
-
-type Response struct {
-	Value `json:"value"`
-	Time `json:"time`
-}
-
-var DCMAP = make(map[int]string)
 
 func FetchDC(token string, workspace_id string, i int){
 
@@ -59,28 +34,51 @@ func FetchDC(token string, workspace_id string, i int){
 	*/
 	urlValues := fmt.Sprintf("key.studioId=%s&key.workspaceId=%s&key.path.values=tenants&key.path.values=%d&key.path.values=name", studioID, workspace_id,i) 
 	Fullurl_ := baseURL + "?" + urlValues
-	fmt.Println(Fullurl_)
 	req ,err := http.NewRequest("GET", Fullurl_, nil)
 	
 	if err!= nil {
 		fmt.Printf("%v", err)
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	temp:= fmt.Sprintf("Bearer %s", token)
-	req.Header.Set("Authorization", temp)
+	SetHeaders(req, token)
 	client := &http.Client{}
 	response, err := client.Do(req)
-
 	if err!= nil{
 		fmt.Printf("%v", err)
-	}
-	
+	}	
 	defer response.Body.Close()
-	fmt.Println("Status Code:", response.Status)
  	body, _ := io.ReadAll(response.Body)
-	body1 := string(body)
-	fmt.Print(body1)
+	var result map[string]interface{}
+	json.Unmarshal([]byte(body), &result)
+	result_ := result["value"].(map[string]interface{})
+	value_:= result_["key"].(map[string]interface{})
+	tenant_ := value_["path"].(map[string]interface{})["values"].([]interface {})
+	DCMAP[result_["inputs"].(string)] = tenant_[1].(string)
+
+}
+
+func FetchVLAN(token string, workspace_id string, i int){
+	urlValues := fmt.Sprintf("key.studioId=%s&key.workspaceId=%s&key.path.values=tenants&key.path.values=%d&key.path.values=vlans", studioID, workspace_id,i) 
+	Fullurl_ := baseURL + "?" + urlValues
+	req, err := http.NewRequest("GET", Fullurl_, nil)
+	if err!=nil {
+		fmt.Printf("%v", err)
+	}
+	SetHeaders(req, token)
+
+	client := &http.Client{}
+	response, err := client.Do(req)
+	if err!= nil{
+		fmt.Printf("%v", err)
+	}	
+	defer response.Body.Close()
+ 	body, _ := io.ReadAll(response.Body)
+	var result map[string]interface{}
+	json.Unmarshal([]byte(body), &result)
+	result_ := (result["value"].(map[string]interface{})["inputs"]).(string)
+	InputsBytes := []byte(result_)
+	var finalInput []map[string]interface{}
+	json.Unmarshal(InputsBytes, &finalInput)
+	finalInput_node = 
 
 
 }
@@ -89,6 +87,17 @@ func VPCmain(token string, workspaceID string){
 	for DC_COUNTER:=range TenantCount{
 		FetchDC(token, workspaceID,DC_COUNTER)
 	}
+	fmt.Println("--------- Fetch DC --------------")
+	for key,value := range DCMAP{
+		fmt.Println(key, value)
+	}
+	fmt.Println("---------------------------------")
+	FetchVLAN(token, workspaceID, 0)
+		fmt.Println("--------- Fetch DC --------------")
+	for key,value := range VRFs{
+		fmt.Println(key, value)
+	}
+	fmt.Println("---------------------------------")
 	
 }
 
