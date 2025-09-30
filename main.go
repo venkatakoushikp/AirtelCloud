@@ -1,0 +1,24 @@
+
+package main
+
+import (
+	//"AirtelCloud/workspaceCreation"
+	"AirtelCloud/VPC"
+)
+
+const (
+	 //token = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOjc0ODYxNzIyMTc5MTEyODkwNzgsImRzdCI6InVzZXIiLCJleHAiOjE3NTkyMDY2ODcsImlhdCI6MTc1OTEyMDI4OCwib2dpIjo3NDc3NjY4MTYxMTkwMzYzMzg3LCJvZ24iOiJhcmlzdGEtY2hhaSIsInNpZCI6IjBlNGYzZmZjZDNmNmZmYWYzY2Q4NTU2MDM1YTJkZTM1OWQ5OTcxYWRmYzBmOGQyYzhmNTcyZWVkZDljMWE2ZTQtcGtjRTJkcGhLV2tWM1pyQlFIRWl1MkNLS21nYlFaUU9GckVucjJUYSJ9.Z9MQ9lnCpnm29dfbltcIb10SAdCALec-7FZU_1t5WwK1eJoShsPfQL38nP4cdHqvllmv68f5npJKR4FLOn4S0w"
+	 tokenAirtel = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRfaWQiOiJzdXBwb3J0LWludml0YXRpb24iLCJkaWQiOjc0Nzc2NjgxNjExOTAzNjQ0NzUsImRzdCI6InVzZXIiLCJleHAiOjE3NTkyMjYzMzgsImlhdCI6MTc1OTEzOTkzOSwibGJhYyI6eyJzdWJuZXRzIjpbIjAuMC4wLjAvMCIsIjo6LzAiXX0sIm9naSI6NzQ3NzY2ODE2MTE5MDM2Mzg2Miwib2duIjoiYWlydGVsLXB1YmxpYy1jbG91ZCIsInNpZCI6IjhkOTk4ODRkNjMyNmY5ZDk0NWYyYjc0YjJjMWVhZDIwNDFjMTQzNDBkMjQ3MGFkMDhlZDNhNDJhYjkxNGRhOGQtWVZSRFg0YXUyQkZEeXllSm5CdGFEUHNfSVVoZkhJTGNVT3N6YWtnNiJ9.GmGkBAV6L3-uVoQBKKmzrF0QPeuyPW0LCacfFqYgzRLeMSmGut_J6L8E_ijRYqqcRaytwo8rCqTAOPkJklZ_NQ"
+)
+
+func main(){
+	// Create a workspace first
+	workspaceID := ""
+	//workspaceCreation.CreateWorkspace(token, workspaceID)
+	/*
+	If the service selected on CMP is VPC, a new VRF + Description is added Using EVPN Services Studio
+	*/
+	VPC.VPCmain(tokenAirtel, workspaceID)
+
+	
+}
