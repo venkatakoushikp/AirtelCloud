@@ -14,7 +14,43 @@ const (
 )
 
 var DCMAP = make(map[string]string)
-var VRFs = make(map[int]map[int]string)
+var VLANs = make(map[int]VRF)
+
+type SviIpInfo struct {
+    AutoGenNodeVlanVni bool   `json:"autoGenNodeVlanVni"`
+    IpAddress          string `json:"ipAddress"`
+    IpAddressV6        string `json:"ipAddressV6"`
+    SviDescription     string `json:"sviDescription"`
+    VirtualIpAddress   string `json:"virtualIpAddress"`
+    VirtualIpAddressV6 string `json:"virtualIpAddressV6"`
+    VlanName           string `json:"vlanName"`
+}
+
+type Inputs struct {
+    SviIpInfo SviIpInfo `json:"sviIpInfo"`
+}
+
+type Node struct {
+    Inputs Inputs            `json:"inputs"`
+    Tags   map[string]string `json:"tags"`
+}
+
+type Switch struct {
+    Inputs map[string]interface{} `json:"inputs"`
+    Tags   map[string]string      `json:"tags"`
+}
+
+type VRF struct {
+    Arp               map[string]interface{} `json:"arp"`
+    DhcpServerDetails []interface{}          `json:"dhcpServerDetails"`
+    ETreedetails      map[string]interface{} `json:"eTreeDetails"`
+    Nodes             []Node                 `json:"nodes"`
+    Switches          []Switch               `json:"switches"`
+    VlanId            int                    `json:"vlanId"`
+    Vrf               string                 `json:"vrf"`
+    Vxlan             bool                   `json:"vxlan"`
+}
+
 func SetHeaders(req *http.Request, token string){
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
@@ -77,8 +113,16 @@ func FetchVLAN(token string, workspace_id string, i int){
 	result_ := (result["value"].(map[string]interface{})["inputs"]).(string)
 	InputsBytes := []byte(result_)
 	var finalInput []map[string]interface{}
-	json.Unmarshal(InputsBytes, &finalInput)
-	finalInput_node = 
+	json.Unmarshal(InputsBytes, &finalInput)       
+	for k,v := range finalInput{
+		var current_vlan_info VRF
+		b, _ := json.Marshal(v)  
+		json.Unmarshal(b, &current_vlan_info)  
+		VLANs[k]=current_vlan_info
+
+	}
+
+
 
 
 }
@@ -92,10 +136,13 @@ func VPCmain(token string, workspaceID string){
 		fmt.Println(key, value)
 	}
 	fmt.Println("---------------------------------")
+
 	FetchVLAN(token, workspaceID, 0)
-		fmt.Println("--------- Fetch DC --------------")
-	for key,value := range VRFs{
-		fmt.Println(key, value)
+	
+	fmt.Println("--------- Fetch DC --------------")
+	for key,value := range VLANs{
+		fmt.Printf("VLAN : %d VRF : %v \t", key,value.Vrf)
+		fmt.Println(value.Switches)
 	}
 	fmt.Println("---------------------------------")
 	
